@@ -49,7 +49,7 @@
               </div>
             </div>
           {else}
-            <input type="text" class="form-control" id="opp-owner-profile-{$PROFILE_FIELD.key|escape}" name="opp_owner_profile[{$PROFILE_FIELD.key|escape}][value_text]" value="{$PROFILE_FIELD.value_text|escape}" {if !empty($PROFILE_FIELD.max_length)}maxlength="{$PROFILE_FIELD.max_length|escape}"{/if} />
+            <input type="{if $PROFILE_FIELD.key == 'contact_number'}tel{else}text{/if}" class="form-control" id="opp-owner-profile-{$PROFILE_FIELD.key|escape}" name="opp_owner_profile[{$PROFILE_FIELD.key|escape}][value_text]" value="{$PROFILE_FIELD.value_text|escape}" {if !empty($PROFILE_FIELD.max_length)}maxlength="{$PROFILE_FIELD.max_length|escape}"{/if}{if $PROFILE_FIELD.key == 'contact_number'} inputmode="tel" autocomplete="tel" placeholder="+421 903 223 183" data-invalid-phone-message="{'Please add a valid contact phone number in My Profile first.'|@translate}"{/if} />
           {/if}
         </div>
       </div>

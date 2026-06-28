@@ -86,6 +86,78 @@
     return payload;
   }
 
+  function getContactNumberField(profile) {
+    if (!profile) {
+      return null;
+    }
+
+    return profile.querySelector(
+      '.opp-owner-profile-field[data-field-key="contact_number"] input',
+    );
+  }
+
+  function normalizeSlovakPhoneNumber(value) {
+    var trimmed = String(value || "").trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    var digits = trimmed.replace(/[^0-9+]/g, "");
+    if (!digits) {
+      return null;
+    }
+
+    if (digits.charAt(0) === "+") {
+      var plusNormalized = "+" + digits.slice(1).replace(/[^0-9]/g, "");
+      return /^\+421\d{9}$/.test(plusNormalized) ? plusNormalized : null;
+    }
+
+    var plainDigits = digits.replace(/[^0-9]/g, "");
+    if (/^421\d{9}$/.test(plainDigits)) {
+      return "+" + plainDigits;
+    }
+    if (/^0\d{9}$/.test(plainDigits)) {
+      return "+421" + plainDigits.slice(1);
+    }
+    if (/^9\d{8}$/.test(plainDigits)) {
+      return "+421" + plainDigits;
+    }
+
+    return null;
+  }
+
+  function validateOwnerProfilePayload(profile, payload) {
+    if (!profile || !payload || !payload.fields) {
+      return null;
+    }
+
+    var contactField = getContactNumberField(profile);
+    if (!contactField) {
+      return null;
+    }
+
+    var rawPhone = contactField.value || "";
+    if (!rawPhone.trim()) {
+      return null;
+    }
+
+    if (!normalizeSlovakPhoneNumber(rawPhone)) {
+      var invalidMessage =
+        contactField.getAttribute("data-invalid-phone-message") ||
+        "Please add a valid contact phone number in My Profile first.";
+      contactField.setCustomValidity(invalidMessage);
+      if (typeof contactField.reportValidity === "function") {
+        contactField.reportValidity();
+      }
+      contactField.focus();
+      return invalidMessage;
+    }
+
+    contactField.setCustomValidity("");
+
+    return null;
+  }
+
   function submitWsRequest(method, token, payload) {
     var params = new URLSearchParams();
     params.set("pwg_token", token);
@@ -104,7 +176,82 @@
   }
 
   function getWsErrorMessage(data) {
-    return data && data.message ? data.message : "An error has occurred.";
+    if (!data) {
+      return "An error has occurred.";
+    }
+
+    if (typeof data.message === "string" && data.message.trim() !== "") {
+      return data.message;
+    }
+
+    if (typeof data.result === "string" && data.result.trim() !== "") {
+      return data.result;
+    }
+
+    if (
+      data.result &&
+      typeof data.result.message === "string" &&
+      data.result.message.trim() !== ""
+    ) {
+      return data.result.message;
+    }
+
+    if (Array.isArray(data.errors) && data.errors.length > 0) {
+      var firstError = data.errors[0];
+      if (
+        firstError &&
+        typeof firstError.message === "string" &&
+        firstError.message.trim() !== ""
+      ) {
+        return firstError.message;
+      }
+    }
+
+    return "An error has occurred.";
+  }
+
+  function syncContactFieldValidity(profile) {
+    var contactField = getContactNumberField(profile);
+    if (!contactField) {
+      return;
+    }
+
+    var rawPhone = contactField.value || "";
+    if (!rawPhone.trim()) {
+      contactField.setCustomValidity("");
+      return;
+    }
+
+    if (normalizeSlovakPhoneNumber(rawPhone)) {
+      contactField.setCustomValidity("");
+      return;
+    }
+
+    contactField.setCustomValidity(
+      contactField.getAttribute("data-invalid-phone-message") ||
+        "Please add a valid contact phone number in My Profile first.",
+    );
+  }
+
+  function initProfileValidation() {
+    var profiles = document.querySelectorAll(".opp-owner-profile");
+    for (var i = 0; i < profiles.length; i++) {
+      var profile = profiles[i];
+      var contactField = getContactNumberField(profile);
+      if (!contactField) {
+        continue;
+      }
+
+      syncContactFieldValidity(profile);
+      contactField.addEventListener("input", function () {
+        var currentProfile = this.closest(".opp-owner-profile");
+        syncContactFieldValidity(currentProfile);
+      });
+      contactField.addEventListener("blur", function () {
+        var currentProfile = this.closest(".opp-owner-profile");
+        syncContactFieldValidity(currentProfile);
+      });
+    }
   }
 
   function showToaster(message, isError) {
@@ -187,7 +334,10 @@
     }
   }
 
-  document.addEventListener("DOMContentLoaded", placePublicProfile);
+  document.addEventListener("DOMContentLoaded", function () {
+    placePublicProfile();
+    initProfileValidation();
+  });
 
   document.addEventListener("click", function (event) {
     var profileButton = event.target.closest(".opp-owner-profile-save-button");
@@ -203,6 +353,16 @@
 
     var profilePayload = collectOwnerProfilePayload(profileCard);
     if (!profilePayload) {
+      return;
+    }
+
+    var validationMessage = validateOwnerProfilePayload(
+      profileCard,
+      profilePayload,
+    );
+    if (validationMessage) {
+      setStatusMessage(profileCard, validationMessage, true);
+      showToaster(validationMessage, true);
       return;
     }
 
