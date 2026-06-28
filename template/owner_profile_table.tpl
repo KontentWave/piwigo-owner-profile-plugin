@@ -1,23 +1,25 @@
 <div class="opp-owner-profile-public">
   {if !empty($OPP_OWNER_PROFILE_ROWS)}
-    <table class="opp-owner-profile-table">
-      <tbody>
+    <div class="opp-owner-profile-section opp-owner-profile-section-facts">
+      <table class="opp-owner-profile-table" role="table">
+        <tbody>
         {foreach from=$OPP_OWNER_PROFILE_ROWS item=PROFILE_ROW}
-          <tr>
-            <th scope="row">{$PROFILE_ROW.label|escape}</th>
-            <td>{$PROFILE_ROW.value_text|escape}</td>
+          <tr class="opp-owner-profile-row opp-owner-profile-row-{$PROFILE_ROW.key|escape}">
+            <th class="opp-owner-profile-label" scope="row">{$PROFILE_ROW.label|escape}</th>
+            <td class="opp-owner-profile-value">{$PROFILE_ROW.value_text|escape}</td>
           </tr>
         {/foreach}
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
   {/if}
 
   {if !empty($OPP_OWNER_PROFILE_CONTACTS)}
-    <div class="opp-owner-profile-contacts mt-4">
-      <h5 class="mb-3">{'Contact'|@translate}</h5>
-      <div class="opp-owner-profile-contact-actions mb-3">
+    <section class="opp-owner-profile-section opp-owner-profile-contacts mt-4" aria-labelledby="opp-owner-profile-contact-title">
+      <h5 class="opp-owner-profile-section-title mb-3" id="opp-owner-profile-contact-title">{'Contact'|@translate}</h5>
+      <div class="opp-owner-profile-contact-actions mb-3" role="list">
         {foreach from=$OPP_OWNER_PROFILE_CONTACTS item=CONTACT}
-          <a class="opp-owner-profile-contact-link opp-owner-profile-contact-{$CONTACT.key|escape}" href="{$CONTACT.href|escape}" rel="nofollow noopener" target="_blank" aria-label="{$CONTACT.label|escape}: {$CONTACT.display_value|escape}" title="{$CONTACT.label|escape}">
+          <a class="opp-owner-profile-contact-link opp-owner-profile-contact-{$CONTACT.key|escape}" href="{$CONTACT.href|escape}" rel="nofollow noopener" target="_blank" aria-label="{$CONTACT.label|escape}: {$CONTACT.display_value|escape}" title="{$CONTACT.label|escape}" role="listitem">
             <span class="opp-owner-profile-contact-icon" aria-hidden="true">
               {if $CONTACT.key == 'phone'}
                 <svg viewBox="0 0 24 24" focusable="false"><path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.33.57 3.57.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.07 21 3 13.93 3 5a1 1 0 0 1 1-1h3.49a1 1 0 0 1 1 1c0 1.24.2 2.45.57 3.57a1 1 0 0 1-.24 1.02l-2.2 2.2Z" fill="currentColor"/></svg>
@@ -31,20 +33,20 @@
         {/foreach}
       </div>
       <div class="opp-owner-profile-contact-number">{$OPP_OWNER_PROFILE_CONTACTS[0].display_value|escape}</div>
-    </div>
+    </section>
   {/if}
 
   {if !empty($OPP_OWNER_PROFILE_AVAILABILITY)}
-    <div class="opp-owner-profile-availability mt-4">
-      <h5 class="mb-3">{'Availability'|@translate}</h5>
+    <section class="opp-owner-profile-section opp-owner-profile-availability mt-4" aria-labelledby="opp-owner-profile-availability-title">
+      <h5 class="opp-owner-profile-section-title mb-3" id="opp-owner-profile-availability-title">{'Availability'|@translate}</h5>
       <div class="opp-owner-profile-availability-list">
         {foreach from=$OPP_OWNER_PROFILE_AVAILABILITY item=AVAILABILITY_ROW}
-          <div class="opp-owner-profile-availability-row">
+          <div class="opp-owner-profile-availability-row opp-owner-profile-availability-row-{$AVAILABILITY_ROW.key|escape}">
             <span class="opp-owner-profile-availability-day">{$AVAILABILITY_ROW.label|escape}</span>
             <span class="opp-owner-profile-availability-time">{$AVAILABILITY_ROW.value_text|escape}</span>
           </div>
         {/foreach}
       </div>
-    </div>
+    </section>
   {/if}
 </div>

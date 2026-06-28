@@ -1,23 +1,41 @@
 .opp-owner-profile-public {
   max-width: 960px;
+  color: inherit;
+}
+
+.opp-owner-profile-section + .opp-owner-profile-section {
+  margin-top: 2rem;
+}
+
+.opp-owner-profile-section-title {
+  font-size: 1.15rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 .opp-owner-profile-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: separate;
-  border-spacing: 0 0.55rem;
+  border-spacing: 0 0.7rem;
 }
 
 .opp-owner-profile-table th,
 .opp-owner-profile-table td {
-  padding: 0.15rem 0;
+  padding: 0.1rem 0;
   vertical-align: top;
 }
 
 .opp-owner-profile-table th {
-  width: 34%;
+  width: 33%;
   font-weight: 600;
-  opacity: 0.9;
+  opacity: 0.78;
+  padding-right: 1.5rem;
+}
+
+.opp-owner-profile-value {
+  word-break: break-word;
+  opacity: 0.96;
 }
 
 .opp-owner-profile-contact-actions {
@@ -35,6 +53,17 @@
   border-radius: 999px;
   color: #fff;
   text-decoration: none;
+  box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.18);
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.opp-owner-profile-contact-link:hover,
+.opp-owner-profile-contact-link:focus-visible {
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 0.5rem 1.2rem rgba(0, 0, 0, 0.24);
 }
 
 .opp-owner-profile-contact-phone {
@@ -64,6 +93,7 @@
   font-size: 1.65rem;
   font-weight: 600;
   letter-spacing: 0.01em;
+  line-height: 1.15;
 }
 
 .opp-owner-profile-availability-list {
@@ -76,6 +106,7 @@
   justify-content: space-between;
   gap: 1rem;
   align-items: center;
+  width: 100%;
 }
 
 .opp-owner-profile-availability-time {
@@ -87,6 +118,7 @@
   border-radius: 0.35rem;
   background: rgba(0, 0, 0, 0.35);
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .opp-owner-profile .opp-status {
@@ -106,6 +138,10 @@
     max-width: none;
   }
 
+  .opp-owner-profile-section + .opp-owner-profile-section {
+    margin-top: 1.75rem;
+  }
+
   .opp-owner-profile-table,
   .opp-owner-profile-table tbody,
   .opp-owner-profile-table tr,
@@ -120,13 +156,18 @@
   }
 
   .opp-owner-profile-table th {
-    margin-bottom: 0.1rem;
+    margin-bottom: 0.12rem;
+    padding-right: 0;
   }
 
   .opp-owner-profile-contact-number {
     font-size: 1.9rem;
     line-height: 1.1;
     word-break: break-word;
+  }
+
+  .opp-owner-profile-contact-actions {
+    gap: 0.65rem;
   }
 
   .opp-owner-profile-availability-row {
