@@ -1,0 +1,1 @@
+Owns owner public profile data, editor UI, and public profile rendering.

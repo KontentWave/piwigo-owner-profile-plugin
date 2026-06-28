@@ -1,0 +1,139 @@
+.opp-owner-profile-public {
+  max-width: 960px;
+}
+
+.opp-owner-profile-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.55rem;
+}
+
+.opp-owner-profile-table th,
+.opp-owner-profile-table td {
+  padding: 0.15rem 0;
+  vertical-align: top;
+}
+
+.opp-owner-profile-table th {
+  width: 34%;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.opp-owner-profile-contact-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.opp-owner-profile-contact-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  color: #fff;
+  text-decoration: none;
+}
+
+.opp-owner-profile-contact-phone {
+  background: #4776ff;
+}
+
+.opp-owner-profile-contact-sms {
+  background: #3756d6;
+}
+
+.opp-owner-profile-contact-whatsapp {
+  background: #29b65b;
+}
+
+.opp-owner-profile-contact-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: inline-flex;
+}
+
+.opp-owner-profile-contact-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.opp-owner-profile-contact-number {
+  font-size: 1.65rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.opp-owner-profile-availability-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.opp-owner-profile-availability-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.opp-owner-profile-availability-time {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 7rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 0.35rem;
+  background: rgba(0, 0, 0, 0.35);
+  font-weight: 600;
+}
+
+.opp-owner-profile .opp-status {
+  margin-bottom: 1rem;
+}
+
+.opp-owner-profile-field + .opp-owner-profile-field {
+  margin-top: 0.35rem;
+}
+
+.opp-owner-profile select[multiple] {
+  min-height: 6rem;
+}
+
+@media (max-width: 991.98px) {
+  .opp-owner-profile-public {
+    max-width: none;
+  }
+
+  .opp-owner-profile-table,
+  .opp-owner-profile-table tbody,
+  .opp-owner-profile-table tr,
+  .opp-owner-profile-table th,
+  .opp-owner-profile-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .opp-owner-profile-table tr {
+    margin-bottom: 0.9rem;
+  }
+
+  .opp-owner-profile-table th {
+    margin-bottom: 0.1rem;
+  }
+
+  .opp-owner-profile-contact-number {
+    font-size: 1.9rem;
+    line-height: 1.1;
+    word-break: break-word;
+  }
+
+  .opp-owner-profile-availability-row {
+    display: block;
+  }
+
+  .opp-owner-profile-availability-time {
+    margin-top: 0.45rem;
+  }
+}

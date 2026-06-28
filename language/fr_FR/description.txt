@@ -1,0 +1,1 @@
+Gere les donnees du profil public, l'interface d'edition et le rendu public du profil proprietaire.
