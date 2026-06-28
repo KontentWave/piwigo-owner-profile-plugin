@@ -5,6 +5,11 @@ Feature: Owner Profile plugin
   I want to manage my public profile separately from album privacy
   So that profile data can be reused by display, SMS verification, and future search features
 
+  # Current repository scope:
+  # - PR 1 complete
+  # - PR 2 partially complete
+  # - PR 3+ scenarios remain deferred until work continues in other repositories
+
   Background:
     Given the CPT plugin is active
     And the Owner Profile plugin is active
@@ -42,6 +47,23 @@ Feature: Owner Profile plugin
     And it should include profile rows
     And it should include enabled contact links
     And it should not display empty fields
+
+  Scenario: Public profile is shown only on the owner root album
+    Given "gallery_owner" has saved public profile fields
+    When a visitor opens a deeper subalbum under "slecna1"
+    Then the public profile block should not be displayed
+
+  Scenario: Invalid Slovak contact number is rejected during profile save
+    Given I am logged in as "gallery_owner"
+    And I open the "My Profile" section
+    When I enter "12345" as "Contact number"
+    And I save the profile
+    Then the request should be rejected
+    And I should see a contact-number validation error
+
+  # Deferred PR 3+ scenarios
+  # These describe intended behavior, but are not yet wired through the live
+  # Two Factor or CPT integration paths in the current repository state.
 
   Scenario: Contact phone candidate is read from Owner Profile
     Given "gallery_owner" saved contact number "+421 905 000 000"

@@ -2,6 +2,11 @@
 
 This document is the living technical specification for extracting owner profile data from CPT into a standalone Piwigo plugin.
 
+It now serves two purposes:
+
+- document what is already implemented in the standalone `owner_profile` repository
+- separate that from the still-deferred compatibility and integration work
+
 Suggested plugin name:
 
 ```text
@@ -21,6 +26,28 @@ piwigo-owner-profile-plugin
 Create a new standalone Piwigo plugin that owns profile fields, contact data, availability, UCP My Profile, and public profile payload/rendering.
 
 CPT remains responsible for album ownership and privacy.
+
+## Current Delivery State
+
+Implemented now in the standalone `owner_profile` repository:
+
+- standalone plugin bootstrap and repository split
+- canonical `piwigo_owner_profile` table
+- install-time and lazy idempotent migration from `piwigo_cpt_owner_profile`
+- Owner Profile UCP block on the Piwigo profile page
+- AJAX save path with CSRF check and ownership validation
+- public profile rendering on owner root album pages only
+- Bootstrap Darkroom-oriented public placement payload via `OPP_ALBUM_PAGE_HTML`
+- Slovak phone normalization helper and candidate-phone helper
+- focused PHPUnit coverage for save validation and public rendering
+
+Planned later in other PRs:
+
+- Two Factor integration changes
+- CPT disable/skip behavior when Owner Profile is active
+- temporary CPT compatibility wrappers if they are still needed
+- PLG regression-only follow-up
+- search/tag indexing follow-up
 
 ---
 
@@ -182,6 +209,7 @@ opp_fetch_owner_profile_rows(int $root_album_id, int $owner_user_id): array
 opp_update_owner_profile(array $payload, int $user_id): bool
 opp_get_contact_phone_candidate(int $user_id): array
 opp_get_contact_rows(int $user_id): array
+opp_get_last_error(): ?string
 ```
 
 Suggested contact candidate return:
@@ -205,6 +233,8 @@ array(
 ---
 
 ## Temporary Compatibility API
+
+Status: planned later, not implemented yet in the current standalone repository.
 
 During migration, provide wrappers for old CPT profile functions if CPT has not already defined them:
 
@@ -233,7 +263,7 @@ The new plugin owns:
 ```text
 template/ucp_owner_profile.tpl
 js/owner_profile.js
-css/owner_profile.css
+template/style.css
 ```
 
 Behavior:
@@ -252,6 +282,11 @@ Security:
 - unknown field keys ignored
 - controlled values must match known options
 - contact number is normalized only where needed; stored display value may preserve readable formatting
+
+Current implementation note:
+
+- `contact_number` is validated as a Slovak phone candidate for the current standalone plugin behavior
+- the UI provides immediate client-side validation in addition to backend validation
 
 ---
 
@@ -278,6 +313,15 @@ OPP_OWNER_PROFILE_TABLE
 OPP_ALBUM_PAGE_HTML
 ```
 
+Implemented now:
+
+- `OPP_UCP_OWNER_PROFILE`
+- `OPP_OWNER_PROFILE_ROWS`
+- `OPP_OWNER_PROFILE_CONTACTS`
+- `OPP_OWNER_PROFILE_AVAILABILITY`
+- `OPP_OWNER_PROFILE_TABLE`
+- `OPP_ALBUM_PAGE_HTML`
+
 Temporary compatibility variables:
 
 ```text
@@ -288,9 +332,13 @@ CPT_OWNER_PROFILE_TABLE
 CPT_ALBUM_PAGE_HTML
 ```
 
+Status: not implemented yet in Owner Profile. These remain compatibility targets for later integration work.
+
 ---
 
 ## 2FA Integration
+
+Status: deferred to PR 3 in the dedicated `two_factor` workspace.
 
 Two Factor SMS should call:
 
@@ -312,6 +360,8 @@ PLG = uses trusted Two Factor phone only
 
 ## PLG Integration
 
+Status: no direct Owner Profile changes are required yet.
+
 PLG does not need raw owner profile data.
 
 PLG continues to use:
@@ -327,29 +377,43 @@ Owner Profile plugin is not a required direct dependency for PLG.
 
 ## Test Plan
 
+Implemented or covered now:
+
 1. Migrates rows from `piwigo_cpt_owner_profile`.
 2. Does not duplicate rows when migration runs twice.
-3. Owner sees My Profile block from Owner Profile plugin.
+3. Owner sees the Owner Profile UCP block.
 4. Owner can save text fields.
 5. Owner can save controlled fields.
-6. Owner can save multi-controlled fields.
-7. Owner can save availability fields.
-8. Non-owner cannot save another owner profile.
-9. Public album page displays rows/contacts/availability.
-10. Contact phone candidate returns `contact_number`.
-11. Contact flags do not become phone numbers.
-12. CPT can run without owning profile data when Owner Profile plugin is active.
-13. 2FA can read candidate phone from Owner Profile plugin.
-14. PLG still uses verified Two Factor phone only.
+6. Non-owner cannot save another owner profile.
+7. Public album page displays rows/contacts/availability.
+8. Invalid Slovak `contact_number` is rejected.
+9. Contact phone candidate returns `contact_number` from Owner Profile helpers.
+10. Contact flags do not become phone numbers in Owner Profile helper behavior.
+
+Deferred to later PRs:
+
+11. 2FA reads candidate phone from Owner Profile with CPT fallback.
+12. CPT skips its old profile block when Owner Profile plugin is active.
+13. PLG regression verification after 2FA/CPT integration changes.
+14. Search/indexing behavior for selected normalized fields.
 
 ---
 
 ## Definition of Done
 
+PR 1 done:
+
 - New plugin installs and creates its own table.
 - Existing CPT profile rows migrate successfully.
+
+PR 2 done or partially done:
+
 - My Profile works from the new plugin.
 - Public profile display works from the new plugin.
-- 2FA candidate phone source works through new helper.
-- CPT skips old profile block when new plugin is active.
-- No CUG change is required.
+- focused tests exist for save validation and public rendering behavior.
+
+Still deferred:
+
+- 2FA candidate phone source works through live Two Factor integration.
+- CPT skips old profile block when Owner Profile plugin is active.
+- no CUG change is required remains an assumption until later integration passes confirm it.

@@ -1,5 +1,17 @@
 # Owner Profile Plugin `PROJECT_ROADMAP.md` (The Future 🗺️)
 
+## Current Status
+
+Current delivery state in the standalone `owner_profile` repository:
+
+- PR 1 complete: standalone plugin bootstrap, table creation, migration, docs baseline, and repository split are done.
+- PR 2 partially complete: UCP editor, public render, save validation, public placement, and focused tests exist inside `owner_profile`.
+- PR 3 not started in the dedicated `two_factor` workspace: 2FA still needs to prefer `opp_get_contact_phone_candidate()` with CPT fallback.
+- PR 4 not started: theme-level fallback support outside the current Owner Profile placement path remains future work.
+- PR 5 not started: CPT still owns its legacy profile paths and has not yet been disabled when Owner Profile is active.
+- PR 6 not started: PLG regression coverage remains future work.
+- PR 7 not started: old CPT profile code cleanup remains future work.
+
 ## Project Vision
 
 Create a standalone Piwigo plugin that owns model/profile data independently from CPT.
@@ -60,6 +72,18 @@ Move CPT-owned profile schema, validation, editor payload, public payload, and r
 - Render a public profile block on the owner root album page.
 - Expose helper functions for CPT, 2FA, PLG, and theme integration.
 
+### Status
+
+Completed in the standalone `owner_profile` repository:
+
+- plugin bootstrap and standalone repository initialization
+- `piwigo_owner_profile` table creation
+- idempotent migration from `piwigo_cpt_owner_profile`
+- Owner Profile UCP block and AJAX save path
+- public profile rendering on owner root album pages
+- client-side Slovak phone validation for `contact_number`
+- focused PHPUnit coverage for save validation and public rendering behavior
+
 ### Non-goals
 
 - Album privacy and sharing.
@@ -85,6 +109,20 @@ Extract without breaking the existing running portal.
 - Let 2FA prefer the new plugin helper but fallback to old CPT table.
 - Let CPT skip its old profile block when the new plugin is active.
 - Preserve public display and UCP behavior during transition.
+
+### Status
+
+Partially complete:
+
+- legacy table migration exists and is idempotent
+- Owner Profile currently depends on CPT only for owner/root album resolution helpers
+- public display and UCP behavior are implemented inside Owner Profile itself
+
+Still pending:
+
+- temporary `cpt_*` compatibility wrappers
+- Two Factor preference for Owner Profile with CPT fallback
+- CPT skip/disable behavior when Owner Profile is active
 
 ---
 
@@ -129,6 +167,15 @@ Optionally expose selected normalized profile traits for search/filtering.
 - PLG still reads verified phone from 2FA only.
 - CPT remains the album/privacy engine only.
 - Theme remains presentation only.
+
+## Current Reality Check
+
+The roadmap is intentionally ahead of the code. As of now:
+
+- Owner Profile is already split into its own repository and plugin.
+- 2FA integration is still deferred to PR 3.
+- CPT disable/compatibility work is still deferred to PR 5 and later cleanup.
+- search/indexing work is still deferred to the later phase described above.
 
 \*Foortnote
 
