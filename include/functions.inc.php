@@ -120,13 +120,8 @@ function opp_prepare_album_page_assets(): void
 {
   global $template;
 
-  $category = opp_get_current_album_page_category();
-  if ($category === null) {
-    return;
-  }
-
-  $profile = opp_get_owner_profile_public_data_for_album((int) $category['id']);
-  if ($profile === null) {
+  $html = opp_get_rendered_owner_profile_table_for_current_album();
+  if ($html === null) {
     return;
   }
 
@@ -140,6 +135,10 @@ function opp_prepare_album_page_assets(): void
     ));
   }
 
+  if (opp_theme_uses_album_page_js_profile_placement()) {
+    return;
+  }
+
   $script_path = opp_plugin_path() . 'js/owner_profile.js';
   if (file_exists($script_path) && method_exists($template, 'func_combine_script')) {
     $template->func_combine_script(array(
@@ -151,18 +150,25 @@ function opp_prepare_album_page_assets(): void
   }
 }
 
-function opp_attach_owner_profile_to_album_page(): void
+function opp_get_rendered_owner_profile_table_for_current_album(): ?string
 {
   global $template;
 
+  $existing = method_exists($template, 'get_template_vars')
+    ? $template->get_template_vars('OPP_OWNER_PROFILE_TABLE')
+    : null;
+  if (is_string($existing) && $existing !== '') {
+    return $existing;
+  }
+
   $category = opp_get_current_album_page_category();
   if ($category === null) {
-    return;
+    return null;
   }
 
   $profile = opp_get_owner_profile_public_data_for_album((int) $category['id']);
   if ($profile === null) {
-    return;
+    return null;
   }
 
   $template->assign('OPP_OWNER_PROFILE_ROWS', $profile['rows']);
@@ -172,11 +178,20 @@ function opp_attach_owner_profile_to_album_page(): void
   $html = $template->parse('opp_owner_profile_table', true);
   $template->assign('OPP_OWNER_PROFILE_TABLE', $html);
 
-  if (!opp_theme_uses_album_page_js_profile_placement()) {
-    opp_append_index_content_begin($html);
+  return $html;
+}
+
+function opp_attach_owner_profile_to_album_page(): void
+{
+  $html = opp_get_rendered_owner_profile_table_for_current_album();
+  if ($html === null) {
+    return;
   }
 
-  opp_inject_album_page_assets($html);
+  if (!opp_theme_uses_album_page_js_profile_placement()) {
+    opp_append_index_content_begin($html);
+    opp_inject_album_page_assets($html);
+  }
 }
 
 function opp_add_ws_methods($arr): void

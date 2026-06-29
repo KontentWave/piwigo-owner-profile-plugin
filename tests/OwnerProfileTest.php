@@ -9,6 +9,7 @@ class OwnerProfileTest extends TestCase
     protected function setUp(): void
     {
         opp_test_reset_env();
+        $GLOBALS['__opp_test_theme_id'] = 'default';
     }
 
     public function testOwnerCanSaveAndReloadProfileFields(): void
@@ -125,5 +126,59 @@ class OwnerProfileTest extends TestCase
         $this->assertStringContainsString('Age', $rendered);
         $this->assertStringContainsString('tel:+421905000000', $rendered);
         $this->assertStringContainsString('opp-owner-profile-public', $pluginSlot);
+    }
+
+    public function testAttachOwnerProfileToAlbumPageKeepsBootstrapDarkroomPlacementInSmartyVariable(): void
+    {
+        global $page, $template;
+
+        $GLOBALS['__opp_test_theme_id'] = 'bootstrap_darkroom';
+
+        $rootAlbumId = opp_test_create_root_album(6, 'slecna1');
+        $page['section'] = 'categories';
+        $page['category'] = ['id' => $rootAlbumId, 'status' => 'public'];
+
+        $this->assertTrue(opp_update_owner_profile([
+            'root_album_id' => $rootAlbumId,
+            'fields' => [
+                'age' => ['value_text' => '24'],
+                'contact_number' => ['value_text' => '+421 905 000 000'],
+                'contact_phone' => ['tag_id' => 1],
+            ],
+        ], 6));
+
+        opp_attach_owner_profile_to_album_page();
+
+        $rendered = $template->get_template_vars('OPP_OWNER_PROFILE_TABLE');
+        $pluginSlot = $template->get_template_vars('PLUGIN_INDEX_CONTENT_BEGIN');
+
+        $this->assertIsString($rendered);
+        $this->assertStringContainsString('opp-owner-profile-public', $rendered);
+        $this->assertNull($pluginSlot);
+        $this->assertSame([], $template->footer_msgs);
+    }
+
+    public function testPrepareAlbumPageAssetsSkipsBootstrapDarkroomPlacementScript(): void
+    {
+        global $page, $template;
+
+        $GLOBALS['__opp_test_theme_id'] = 'bootstrap_darkroom';
+
+        $rootAlbumId = opp_test_create_root_album(6, 'slecna1');
+        $page['section'] = 'categories';
+        $page['category'] = ['id' => $rootAlbumId, 'status' => 'public'];
+
+        $this->assertTrue(opp_update_owner_profile([
+            'root_album_id' => $rootAlbumId,
+            'fields' => [
+                'age' => ['value_text' => '24'],
+            ],
+        ], 6));
+
+        opp_prepare_album_page_assets();
+
+        $this->assertIsString($template->get_template_vars('OPP_OWNER_PROFILE_TABLE'));
+        $this->assertCount(1, $template->combined_css);
+        $this->assertSame([], $template->combined_script);
     }
 }

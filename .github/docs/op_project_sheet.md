@@ -37,7 +37,7 @@ Implemented now in the standalone `owner_profile` repository:
 - Owner Profile UCP block on the Piwigo profile page
 - AJAX save path with CSRF check and ownership validation
 - public profile rendering on owner root album pages only
-- Bootstrap Darkroom-oriented public placement payload via `OPP_ALBUM_PAGE_HTML`
+- server-side Bootstrap Darkroom payload preparation via `OPP_OWNER_PROFILE_TABLE`
 - Slovak phone normalization helper and candidate-phone helper
 - focused PHPUnit coverage for save validation and public rendering
 
@@ -301,7 +301,7 @@ Flow:
 3. Plugin fetches public profile rows for that root owner.
 4. Plugin assigns profile data to Smarty.
 5. Plugin renders owner profile partial.
-6. Plugin injects into page slot or provides JS placement payload for Bootstrap Darkroom.
+6. Plugin injects into a generic page slot for non-theme-specific flows, or prepares theme-consumable Smarty payloads for Bootstrap Darkroom.
 
 Suggested variables:
 
@@ -322,6 +322,43 @@ Implemented now:
 - `OPP_OWNER_PROFILE_TABLE`
 - `OPP_ALBUM_PAGE_HTML`
 
+Bootstrap Darkroom contract now implemented:
+
+```text
+desktop:
+albums -> description -> owner profile block
+
+mobile:
+first album -> description -> owner profile block -> remaining albums
+```
+
+Implementation note:
+
+- Bootstrap Darkroom renders owner-profile payloads directly from Smarty variables at its responsive anchors.
+- The theme prefers `OPP_OWNER_PROFILE_TABLE` and may fall back to `CPT_OWNER_PROFILE_TABLE` during migration.
+- For Bootstrap Darkroom, the plugin must assign `OPP_OWNER_PROFILE_TABLE` early enough for mobile category rendering, not only during the late attach hook.
+- For Bootstrap Darkroom, `opp_prepare_album_page_assets()` still loads public profile CSS but skips the public placement script.
+- For Bootstrap Darkroom, `opp_attach_owner_profile_to_album_page()` must not depend on `PLUGIN_INDEX_CONTENT_BEGIN` or `window.OPP_ALBUM_PAGE_HTML` for final placement.
+- Generic themes may still use normal plugin content slots and plugin-side payload injection.
+
+Implemented Bootstrap Darkroom helper behavior:
+
+```text
+opp_get_rendered_owner_profile_table_for_current_album()
+= resolves the current album page
+= renders owner_profile_table.tpl
+= assigns OPP_OWNER_PROFILE_TABLE
+= reuses the already assigned value when available
+```
+
+Important behavioral detail:
+
+```text
+Bootstrap Darkroom mobile placement runs earlier than its desktop placement block.
+If OPP_OWNER_PROFILE_TABLE is assigned only in the late attach hook,
+mobile owner-profile rendering can disappear while desktop still appears correct.
+```
+
 Temporary compatibility variables:
 
 ```text
@@ -332,7 +369,7 @@ CPT_OWNER_PROFILE_TABLE
 CPT_ALBUM_PAGE_HTML
 ```
 
-Status: not implemented yet in Owner Profile. These remain compatibility targets for later integration work.
+Status: Bootstrap Darkroom currently consumes `OPP_OWNER_PROFILE_TABLE` first and falls back to `CPT_OWNER_PROFILE_TABLE`. The remaining compatibility variables are still transition targets for broader cross-plugin integration.
 
 ---
 
@@ -389,13 +426,15 @@ Implemented or covered now:
 8. Invalid Slovak `contact_number` is rejected.
 9. Contact phone candidate returns `contact_number` from Owner Profile helpers.
 10. Contact flags do not become phone numbers in Owner Profile helper behavior.
+11. Bootstrap Darkroom keeps owner-profile placement in `OPP_OWNER_PROFILE_TABLE`.
+12. Bootstrap Darkroom skips plugin-side public placement script while still loading CSS.
 
 Deferred to later PRs:
 
-11. 2FA reads candidate phone from Owner Profile with CPT fallback.
-12. CPT skips its old profile block when Owner Profile plugin is active.
-13. PLG regression verification after 2FA/CPT integration changes.
-14. Search/indexing behavior for selected normalized fields.
+13. 2FA reads candidate phone from Owner Profile with CPT fallback.
+14. CPT skips its old profile block when Owner Profile plugin is active.
+15. PLG regression verification after 2FA/CPT integration changes.
+16. Search/indexing behavior for selected normalized fields.
 
 ---
 

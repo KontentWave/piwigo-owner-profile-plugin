@@ -66,7 +66,15 @@ if (!function_exists('load_language')) { function load_language($file, $path = '
 if (!function_exists('get_root_url')) { function get_root_url() { return '/'; } }
 if (!function_exists('get_absolute_root_url')) { function get_absolute_root_url() { return '/'; } }
 if (!function_exists('make_index_url')) { function make_index_url($params) { return 'index.php'; } }
-if (!function_exists('get_themeconf')) { function get_themeconf($key) { return $key === 'id' ? 'default' : null; } }
+if (!function_exists('get_themeconf')) {
+    function get_themeconf($key) {
+        if ($key === 'id') {
+            return $GLOBALS['__opp_test_theme_id'] ?? 'default';
+        }
+
+        return null;
+    }
+}
 if (!class_exists('PwgError')) {
     class PwgError {
         public int $code;
