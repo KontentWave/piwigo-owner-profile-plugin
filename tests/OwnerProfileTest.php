@@ -213,6 +213,29 @@ class OwnerProfileTest extends TestCase
         $this->assertSame(['fields' => [['key' => 'legacy']]], $template->get_template_vars('UCP_OWNER_PROFILE'));
     }
 
+    public function testProfilePageHookDoesNotDependOnActivePluginsArrayShape(): void
+    {
+        global $template, $user, $conf;
+
+        $rootAlbumId = opp_test_create_root_album(6, 'slecna1');
+        $user = ['id' => 6, 'is_guest' => false, 'status' => 'normal'];
+        $conf['active_plugins'] = ['core_privacy_toggle' => true, 'owner_profile' => true];
+
+        $this->assertTrue(opp_update_owner_profile([
+            'root_album_id' => $rootAlbumId,
+            'fields' => [
+                'age' => ['value_text' => '24'],
+            ],
+        ], 6));
+
+        opp_setup_profile_page();
+
+        $editorData = $template->get_template_vars('OPP_UCP_OWNER_PROFILE');
+        $this->assertIsArray($editorData);
+        $this->assertSame($rootAlbumId, $editorData['root_album_id']);
+        $this->assertSame('24', $editorData['fields'][2]['value_text']);
+    }
+
     public function testCptAlbumVisibilityChangesDoNotModifyOwnerProfileRows(): void
     {
         $rootAlbumId = opp_test_create_root_album(6, 'slecna1');

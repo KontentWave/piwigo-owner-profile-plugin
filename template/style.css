@@ -125,6 +125,32 @@
   margin-bottom: 1rem;
 }
 
+.opp-owner-profile-field {
+  display: block;
+  margin-right: 0;
+  margin-left: 0;
+}
+
+.opp-owner-profile-field > label,
+.opp-owner-profile-field > div {
+  flex: 0 0 100%;
+  max-width: 100%;
+  width: 100%;
+}
+
+.opp-owner-profile-field > label {
+  display: block;
+  margin-bottom: 0.35rem;
+  padding-right: 0;
+}
+
+.opp-owner-profile-field .form-control,
+.opp-owner-profile-field select,
+.opp-owner-profile-field input,
+.opp-owner-profile-field textarea {
+  width: 100%;
+}
+
 .opp-owner-profile-field + .opp-owner-profile-field {
   margin-top: 0.35rem;
 }

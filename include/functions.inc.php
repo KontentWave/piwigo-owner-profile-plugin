@@ -1056,8 +1056,7 @@ function opp_is_plugin_active(string $plugin_id): bool
 
 function opp_dependency_ready(): bool
 {
-  return opp_is_plugin_active('core_privacy_toggle')
-    && function_exists('cpt_get_effective_owner_root_album_id_for_album')
+  return function_exists('cpt_get_effective_owner_root_album_id_for_album')
     && function_exists('cpt_get_effective_owner_root_album_id_for_user')
     && function_exists('cpt_get_album_effective_owner_id');
 }
