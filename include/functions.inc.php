@@ -283,16 +283,45 @@ function opp_get_owner_profile_field_definition(string $field_key): ?array
   return $schema[$field_key] ?? null;
 }
 
+function opp_get_owner_profile_city_options(): array
+{
+  static $options = null;
+  if ($options !== null) {
+    return $options;
+  }
+
+  $options = array();
+  $city_options_path = opp_plugin_path() . 'include/data/city_options.txt';
+  if (!is_file($city_options_path) || !is_readable($city_options_path)) {
+    return $options;
+  }
+
+  $lines = @file($city_options_path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+  if (!is_array($lines)) {
+    return $options;
+  }
+
+  $seen_labels = array();
+  foreach ($lines as $line) {
+    $label = trim((string) $line);
+    if ($label === '' || isset($seen_labels[$label])) {
+      continue;
+    }
+
+    $seen_labels[$label] = true;
+    $options[count($options) + 1] = $label;
+  }
+
+  return $options;
+}
+
 function opp_get_owner_profile_controlled_options(string $field_key): array
 {
   switch ($field_key) {
     case 'nationality':
       return array(1 => l10n('Slovak'), 2 => l10n('Czech'), 3 => l10n('Ukrainian'), 4 => l10n('Hungarian'), 5 => l10n('Polish'), 6 => l10n('German'), 7 => l10n('Austrian'), 8 => l10n('Romanian'));
     case 'city':
-      if (function_exists('cpt_get_owner_profile_city_options')) {
-        return cpt_get_owner_profile_city_options();
-      }
-      return array();
+      return opp_get_owner_profile_city_options();
     case 'breasts':
       return array(1 => '1', 2 => '2', 3 => '3', 4 => '4', 5 => '5', 6 => '6', 7 => '7');
     case 'private_parts':
@@ -444,8 +473,13 @@ function opp_get_owner_profile_editor_data(int $user_id): ?array
 
       $field['options'] = $options;
       if ($field_type === 'controlled') {
-        if ($field['tag_id'] <= 0 && $field['value_text'] !== '') {
-          $field['tag_id'] = opp_resolve_owner_profile_option_id_from_value($options, $field['value_text']);
+        if ($field['value_text'] !== '') {
+          $selected_option_label = $field['tag_id'] > 0 && isset($options[$field['tag_id']])
+            ? (string) $options[$field['tag_id']]
+            : '';
+          if ($field['tag_id'] <= 0 || $selected_option_label !== $field['value_text']) {
+            $field['tag_id'] = opp_resolve_owner_profile_option_id_from_value($options, $field['value_text']);
+          }
         }
       } else {
         $field['selected_tag_ids'] = opp_resolve_owner_profile_multi_option_ids_from_value($options, $field['value_text']);

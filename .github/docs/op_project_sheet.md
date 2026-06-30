@@ -37,6 +37,7 @@ Implemented now in the standalone `owner_profile` repository:
 - Owner Profile UCP block on the Piwigo profile page
 - AJAX save path with CSRF check and ownership validation
 - public profile rendering on owner root album pages only
+- plugin-owned city option dataset and loader for the `city` controlled field
 - server-side Bootstrap Darkroom payload preparation via `OPP_OWNER_PROFILE_TABLE`
 - Slovak phone normalization helper and candidate-phone helper
 - focused PHPUnit coverage for save validation and public rendering
@@ -207,6 +208,12 @@ contact_sms
 
 contact_whatsapp
 = Yes/No flag for public WhatsApp link
+
+city
+= resolved from `include/data/city_options.txt` inside Owner Profile, not from CPT
+
+city legacy compatibility
+= editor payload remaps stale stored `tag_id` values by saved `value_text` when older CPT-era numbering no longer matches the local city option list
 ```
 
 ---
@@ -457,13 +464,15 @@ Implemented or covered now:
 13. Owner Profile attaches the replacement `My Profile` block independently of CPT's old profile variable.
 14. CPT album visibility/shared-user helper changes do not modify Owner Profile rows.
 15. Owner Profile still resolves the same effective root album while CPT visibility helpers remain usable.
+16. City options are loaded locally from Owner Profile data, including continuation-row labels such as Bratislava II and Košice IV.
+17. Editor data remaps legacy city `tag_id` values from the saved city label when local option numbering differs from old CPT numbering.
 
 Deferred to later PRs:
 
-16. 2FA reads candidate phone from Owner Profile with CPT fallback.
-17. CPT skips its old profile block when Owner Profile plugin is active in live cross-plugin verification.
-18. PLG regression verification after 2FA/CPT integration changes.
-19. Search/indexing behavior for selected normalized fields.
+18. 2FA reads candidate phone from Owner Profile with CPT fallback.
+19. CPT skips its old profile block when Owner Profile plugin is active in live cross-plugin verification.
+20. PLG regression verification after 2FA/CPT integration changes.
+21. Search/indexing behavior for selected normalized fields.
 
 ---
 

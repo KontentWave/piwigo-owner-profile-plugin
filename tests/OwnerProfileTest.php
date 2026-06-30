@@ -12,15 +12,28 @@ class OwnerProfileTest extends TestCase
         $GLOBALS['__opp_test_theme_id'] = 'default';
     }
 
+    private function getControlledOptionId(string $fieldKey, string $label): int
+    {
+        $optionId = opp_resolve_owner_profile_option_id_from_value(
+            opp_get_owner_profile_controlled_options($fieldKey),
+            $label
+        );
+
+        $this->assertGreaterThan(0, $optionId, sprintf('Missing %s option: %s', $fieldKey, $label));
+
+        return $optionId;
+    }
+
     public function testOwnerCanSaveAndReloadProfileFields(): void
     {
         $rootAlbumId = opp_test_create_root_album(6, 'slecna1');
+        $cityOptionId = $this->getControlledOptionId('city', 'Bratislava');
 
         $saved = opp_update_owner_profile([
             'root_album_id' => $rootAlbumId,
             'fields' => [
                 'age' => ['value_text' => '24'],
-                'city' => ['tag_id' => 1],
+                'city' => ['tag_id' => $cityOptionId],
                 'contact_number' => ['value_text' => '+421 905 000 000'],
             ],
         ], 6);
@@ -68,12 +81,13 @@ class OwnerProfileTest extends TestCase
     {
         $rootAlbumId = opp_test_create_root_album(6, 'slecna1');
         $childAlbumId = opp_test_create_child_album($rootAlbumId, 'slecna1_album1');
+        $cityOptionId = $this->getControlledOptionId('city', 'Bratislava');
 
         $this->assertTrue(opp_update_owner_profile([
             'root_album_id' => $rootAlbumId,
             'fields' => [
                 'age' => ['value_text' => '24'],
-                'city' => ['tag_id' => 1],
+                'city' => ['tag_id' => $cityOptionId],
                 'contact_number' => ['value_text' => '903223183'],
                 'contact_phone' => ['tag_id' => 1],
                 'contact_sms' => ['tag_id' => 1],
@@ -97,6 +111,45 @@ class OwnerProfileTest extends TestCase
         $this->assertSame('https://wa.me/421903223183', $rootProfile['contacts'][2]['href']);
         $this->assertCount(1, $rootProfile['availability']);
         $this->assertSame('10:00 - 20:00', $rootProfile['availability'][0]['value_text']);
+    }
+
+    public function testCityOptionsAreLoadedLocallyWithContinuationRows(): void
+    {
+        $options = opp_get_owner_profile_controlled_options('city');
+
+        $this->assertGreaterThan(2000, count($options));
+        $this->assertContains('Bratislava II', $options);
+        $this->assertContains('Bratislava III', $options);
+        $this->assertContains('Košice IV', $options);
+        $this->assertNotSame([1 => 'Bratislava', 2 => 'Kosice'], $options);
+    }
+
+    public function testEditorRemapsLegacyCityTagIdFromSavedValue(): void
+    {
+        $rootAlbumId = opp_test_create_root_album(6, 'slecna1');
+        $resolvedCityId = $this->getControlledOptionId('city', 'Bratislava III');
+
+        $GLOBALS['__opp_db']['owner_profile'][] = [
+            'id' => opp_test_next_id('owner_profile'),
+            'root_album_id' => $rootAlbumId,
+            'owner_user_id' => 6,
+            'field_key' => 'city',
+            'value_text' => 'Bratislava III',
+            'tag_id' => 1,
+        ];
+
+        $editorData = opp_get_owner_profile_editor_data(6);
+        $cityField = null;
+        foreach ($editorData['fields'] as $field) {
+            if (($field['key'] ?? null) === 'city') {
+                $cityField = $field;
+                break;
+            }
+        }
+
+        $this->assertIsArray($cityField);
+        $this->assertSame($resolvedCityId, $cityField['tag_id']);
+        $this->assertSame('Bratislava III', $cityField['options'][$cityField['tag_id']]);
     }
 
     public function testAttachOwnerProfileToAlbumPageAssignsRenderedTable(): void
