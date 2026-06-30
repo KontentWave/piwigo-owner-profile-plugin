@@ -391,6 +391,34 @@ function cpt_get_effective_owner_root_album_id_for_user($userId) {
     return $roots[0];
 }
 
+function cpt_get_effective_owner_root_album_data($userId) {
+    $rootAlbumId = cpt_get_effective_owner_root_album_id_for_user((int) $userId);
+    if ($rootAlbumId === null) {
+        return null;
+    }
+
+    return opp_test_get_category($rootAlbumId);
+}
+
+function cpt_get_album_visibility_mode($albumId) {
+    $category = opp_test_get_category((int) $albumId);
+    if (!$category) {
+        return null;
+    }
+
+    return $category['status'] ?? 'public';
+}
+
+function cpt_get_album_shared_user_ids($albumId) {
+    $category = opp_test_get_category((int) $albumId);
+    if (!$category) {
+        return [];
+    }
+
+    $sharedUsers = $category['shared_user_ids'] ?? [];
+    return is_array($sharedUsers) ? array_values($sharedUsers) : [];
+}
+
 function cpt_get_owner_profile_city_options(): array {
     return [1 => 'Bratislava', 2 => 'Kosice'];
 }
@@ -426,6 +454,19 @@ function opp_test_create_child_album(int $parentId, string $name = 'Album', stri
     ], $extra);
 
     return $id;
+}
+
+function opp_test_update_album_visibility(int $albumId, string $status, array $sharedUserIds = []): void {
+    foreach ($GLOBALS['__opp_db']['categories'] as &$category) {
+        if ((int) $category['id'] !== $albumId) {
+            continue;
+        }
+
+        $category['status'] = $status;
+        $category['shared_user_ids'] = $sharedUserIds;
+        break;
+    }
+    unset($category);
 }
 
 function opp_test_reset_env(): void {

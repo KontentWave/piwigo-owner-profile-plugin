@@ -166,7 +166,18 @@ function opp_get_rendered_owner_profile_table_for_current_album(): ?string
     return null;
   }
 
-  $profile = opp_get_owner_profile_public_data_for_album((int) $category['id']);
+  return opp_get_rendered_owner_profile_table_for_album((int) $category['id']);
+}
+
+function opp_get_rendered_owner_profile_table_for_album(int $album_id): ?string
+{
+  global $template;
+
+  if ($album_id <= 0) {
+    return null;
+  }
+
+  $profile = opp_get_owner_profile_public_data_for_album($album_id);
   if ($profile === null) {
     return null;
   }

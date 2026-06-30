@@ -181,4 +181,84 @@ class OwnerProfileTest extends TestCase
         $this->assertCount(1, $template->combined_css);
         $this->assertSame([], $template->combined_script);
     }
+
+    public function testProfilePageHookAttachesReplacementMyProfileBlockIndependentlyOfLegacyCptVariable(): void
+    {
+        global $template, $user;
+
+        $rootAlbumId = opp_test_create_root_album(6, 'slecna1');
+        $user = ['id' => 6, 'is_guest' => false, 'status' => 'normal'];
+
+        $this->assertTrue(opp_update_owner_profile([
+            'root_album_id' => $rootAlbumId,
+            'fields' => [
+                'age' => ['value_text' => '24'],
+            ],
+        ], 6));
+
+        $template->assign('UCP_OWNER_PROFILE', ['fields' => [['key' => 'legacy']]]);
+
+        opp_setup_profile_page();
+
+        $blockData = $template->get_template_vars('PLUGINS_PROFILE');
+        $editorData = $template->get_template_vars('OPP_UCP_OWNER_PROFILE');
+
+        $this->assertIsArray($blockData);
+        $this->assertNotEmpty($blockData);
+        $this->assertSame($rootAlbumId, $editorData['root_album_id']);
+        $this->assertSame('24', $editorData['fields'][2]['value_text']);
+
+        $templates = array_map(static fn($block) => $block['template'] ?? null, $blockData);
+        $this->assertContains(realpath(OWNER_PROFILE_PATH . 'template/ucp_owner_profile.tpl'), $templates);
+        $this->assertSame(['fields' => [['key' => 'legacy']]], $template->get_template_vars('UCP_OWNER_PROFILE'));
+    }
+
+    public function testCptAlbumVisibilityChangesDoNotModifyOwnerProfileRows(): void
+    {
+        $rootAlbumId = opp_test_create_root_album(6, 'slecna1');
+
+        $this->assertTrue(opp_update_owner_profile([
+            'root_album_id' => $rootAlbumId,
+            'fields' => [
+                'age' => ['value_text' => '24'],
+                'contact_number' => ['value_text' => '+421 905 000 000'],
+                'contact_phone' => ['tag_id' => 1],
+            ],
+        ], 6));
+
+        $before = opp_fetch_owner_profile_rows($rootAlbumId, 6);
+        opp_test_update_album_visibility($rootAlbumId, 'shared', [9, 10]);
+        $after = opp_fetch_owner_profile_rows($rootAlbumId, 6);
+
+        $this->assertSame('shared', cpt_get_album_visibility_mode($rootAlbumId));
+        $this->assertSame([9, 10], cpt_get_album_shared_user_ids($rootAlbumId));
+        $this->assertSame($before, $after);
+    }
+
+    public function testOwnerProfileStillResolvesEffectiveRootAlbumWhileCptVisibilityHelpersRemainUsable(): void
+    {
+        $rootAlbumId = opp_test_create_root_album(6, 'slecna1', 'shared');
+        opp_test_update_album_visibility($rootAlbumId, 'shared', [9, 10]);
+        $childAlbumId = opp_test_create_child_album($rootAlbumId, 'slecna1_album1');
+
+        $this->assertTrue(opp_update_owner_profile([
+            'root_album_id' => $rootAlbumId,
+            'fields' => [
+                'age' => ['value_text' => '24'],
+            ],
+        ], 6));
+
+        $editorData = opp_get_owner_profile_editor_data(6);
+        $rootProfile = opp_get_owner_profile_public_data_for_album($rootAlbumId);
+        $childProfile = opp_get_owner_profile_public_data_for_album($childAlbumId);
+        $rootData = cpt_get_effective_owner_root_album_data(6);
+
+        $this->assertSame($rootAlbumId, cpt_get_effective_owner_root_album_id_for_album($childAlbumId));
+        $this->assertSame($rootAlbumId, $editorData['root_album_id']);
+        $this->assertSame($rootAlbumId, $rootData['id']);
+        $this->assertSame('shared', cpt_get_album_visibility_mode($rootAlbumId));
+        $this->assertSame([9, 10], cpt_get_album_shared_user_ids($rootAlbumId));
+        $this->assertNotNull($rootProfile);
+        $this->assertNull($childProfile);
+    }
 }

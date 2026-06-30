@@ -49,6 +49,14 @@ Planned later in other PRs:
 - PLG regression-only follow-up
 - search/tag indexing follow-up
 
+Implemented now for the CPT extraction transition:
+
+- `opp_get_owner_profile_editor_data()` and `opp_get_owner_profile_public_data_for_album()` are globally available through the normal plugin bootstrap path
+- Owner Profile attaches `My Profile` independently of CPT's old `UCP_OWNER_PROFILE` assignment
+- Owner Profile save/update flows use Owner Profile storage and `owner_profile.update`
+- Owner Profile public rendering stays root-album-only while continuing to use CPT helper APIs for owner/root resolution
+- focused PHPUnit coverage now mirrors the key CPT extraction scenarios from the Owner Profile side
+
 ---
 
 ## Responsibility Split
@@ -109,6 +117,12 @@ The Owner Profile plugin should fail gracefully if CPT is missing:
 - no My Profile block for users without resolvable owner root album
 - admin warning that CPT is required
 - no profile save without owner/root verification
+
+Cross-plugin extraction note:
+
+- CPT now detects Owner Profile by checking `function_exists('opp_get_owner_profile_editor_data')` and `function_exists('opp_get_owner_profile_public_data_for_album')`
+- those functions must remain available from the normal active plugin bootstrap path
+- Owner Profile should treat CPT strictly as an ownership/privacy helper provider, not as a source of profile template variables or legacy save webservices
 ```
 
 ---
@@ -210,6 +224,7 @@ opp_update_owner_profile(array $payload, int $user_id): bool
 opp_get_contact_phone_candidate(int $user_id): array
 opp_get_contact_rows(int $user_id): array
 opp_get_last_error(): ?string
+opp_get_rendered_owner_profile_table_for_album(int $album_id): ?string
 ```
 
 Suggested contact candidate return:
@@ -321,6 +336,7 @@ Implemented now:
 - `OPP_OWNER_PROFILE_AVAILABILITY`
 - `OPP_OWNER_PROFILE_TABLE`
 - `OPP_ALBUM_PAGE_HTML`
+- `opp_get_rendered_owner_profile_table_for_album($album_id)`
 
 Bootstrap Darkroom contract now implemented:
 
@@ -370,6 +386,16 @@ CPT_ALBUM_PAGE_HTML
 ```
 
 Status: Bootstrap Darkroom currently consumes `OPP_OWNER_PROFILE_TABLE` first and falls back to `CPT_OWNER_PROFILE_TABLE`. The remaining compatibility variables are still transition targets for broader cross-plugin integration.
+
+Cross-plugin extraction contract implemented now:
+
+```text
+- CPT contributes My Galleries
+- Owner Profile contributes My Profile
+- CPT no longer needs to assign UCP_OWNER_PROFILE for Owner Profile to work
+- Owner Profile renders the public profile block only for the effective owner root album
+- descendant albums do not render the public profile block
+```
 
 ---
 
@@ -428,13 +454,16 @@ Implemented or covered now:
 10. Contact flags do not become phone numbers in Owner Profile helper behavior.
 11. Bootstrap Darkroom keeps owner-profile placement in `OPP_OWNER_PROFILE_TABLE`.
 12. Bootstrap Darkroom skips plugin-side public placement script while still loading CSS.
+13. Owner Profile attaches the replacement `My Profile` block independently of CPT's old profile variable.
+14. CPT album visibility/shared-user helper changes do not modify Owner Profile rows.
+15. Owner Profile still resolves the same effective root album while CPT visibility helpers remain usable.
 
 Deferred to later PRs:
 
-13. 2FA reads candidate phone from Owner Profile with CPT fallback.
-14. CPT skips its old profile block when Owner Profile plugin is active.
-15. PLG regression verification after 2FA/CPT integration changes.
-16. Search/indexing behavior for selected normalized fields.
+16. 2FA reads candidate phone from Owner Profile with CPT fallback.
+17. CPT skips its old profile block when Owner Profile plugin is active in live cross-plugin verification.
+18. PLG regression verification after 2FA/CPT integration changes.
+19. Search/indexing behavior for selected normalized fields.
 
 ---
 
@@ -456,3 +485,36 @@ Still deferred:
 - 2FA candidate phone source works through live Two Factor integration.
 - CPT skips old profile block when Owner Profile plugin is active.
 - no CUG change is required remains an assumption until later integration passes confirm it.
+
+## CPT Extraction Integration
+
+Current cross-plugin goal:
+
+- whenever both CPT and Owner Profile are enabled, Owner Profile becomes the active owner of profile UI, profile persistence, and public profile rendering
+- CPT remains the owner of album privacy, sharing, representative-image behavior, and owner/root/visibility helper APIs
+
+Owner Profile responsibilities in this transition:
+
+- attach the `My Profile` block on the Piwigo profile page
+- provide the editor payload for that block
+- accept profile saves through `owner_profile.update`
+- render the public profile block for effective owner root albums only
+- avoid showing the public profile block on descendant albums
+- avoid any dependency on CPT assigning `UCP_OWNER_PROFILE` or exposing `core_privacy_toggle.owner_profile.update`
+
+CPT helper APIs Owner Profile should keep using:
+
+- `cpt_get_effective_owner_root_album_id_for_user()`
+- `cpt_get_effective_owner_root_album_id_for_album()`
+- `cpt_get_effective_owner_root_album_data()`
+- `cpt_get_album_effective_owner_id()`
+- `cpt_get_album_visibility_mode()`
+- `cpt_get_album_shared_user_ids()`
+
+Acceptance shape for this integration:
+
+1. On the profile page, `My Galleries` comes from CPT and `My Profile` comes from Owner Profile.
+2. On the owner root album page, the public profile block comes from Owner Profile.
+3. On descendant albums, no public profile block is rendered.
+4. Changing album visibility in CPT does not modify profile data.
+5. CPT helper APIs remain usable by PLG and other plugins.
