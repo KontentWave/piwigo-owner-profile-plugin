@@ -56,7 +56,7 @@
     {/foreach}
 
     <div class="text-right mt-3 opp-owner-profile-save-actions">
-      <button type="button" class="btn btn-primary opp-owner-profile-save-button">{'Save Public Profile'|@translate}</button>
+      <button type="button" class="btn btn-main opp-owner-profile-save-button">{'Save Public Profile'|@translate}</button>
     </div>
   </div>
 {/if}

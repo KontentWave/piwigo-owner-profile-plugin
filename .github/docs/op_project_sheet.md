@@ -38,7 +38,10 @@ Implemented now in the standalone `owner_profile` repository:
 - AJAX save path with CSRF check and ownership validation
 - public profile rendering on owner root album pages only
 - plugin-owned city option dataset and loader for the `city` controlled field
+- localized Owner Profile UI strings and plugin descriptions for `en_UK`, `es_ES`, `hu_HU`, `sk_SK`, `ru_RU`, `uk_UA`, and `zh_CN`
+- language-aware font stacks for Latin, Cyrillic, and Simplified Chinese profile UI rendering
 - server-side Bootstrap Darkroom payload preparation via `OPP_OWNER_PROFILE_TABLE`
+- Bootstrap Darkroom-aligned `Save Public Profile` button styling in the profile UCP block
 - Slovak phone normalization helper and candidate-phone helper
 - focused PHPUnit coverage for save validation and public rendering
 
@@ -309,6 +312,8 @@ Current implementation note:
 
 - `contact_number` is validated as a Slovak phone candidate for the current standalone plugin behavior
 - the UI provides immediate client-side validation in addition to backend validation
+- the save action uses Darkroom's `btn btn-main` button treatment so the Owner Profile block matches the surrounding profile page styling
+- the plugin ships localized UCP/public-profile strings and localized plugin descriptions for `en_UK`, `es_ES`, `hu_HU`, `sk_SK`, `ru_RU`, `uk_UA`, and `zh_CN`
 
 ---
 
@@ -362,6 +367,7 @@ Implementation note:
 - For Bootstrap Darkroom, the plugin must assign `OPP_OWNER_PROFILE_TABLE` early enough for mobile category rendering, not only during the late attach hook.
 - For Bootstrap Darkroom, `opp_prepare_album_page_assets()` still loads public profile CSS but skips the public placement script.
 - For Bootstrap Darkroom, `opp_attach_owner_profile_to_album_page()` must not depend on `PLUGIN_INDEX_CONTENT_BEGIN` or `window.OPP_ALBUM_PAGE_HTML` for final placement.
+- On mobile, public profile fact rows keep labels on the left and values on the right instead of stacking vertically, and availability rows keep weekday and hours inline.
 - Generic themes may still use normal plugin content slots and plugin-side payload injection.
 
 Implemented Bootstrap Darkroom helper behavior:

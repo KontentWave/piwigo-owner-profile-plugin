@@ -1,0 +1,1 @@
+Gestiona los datos del perfil publico de la propietaria, la interfaz de edicion y la visualizacion publica del perfil.

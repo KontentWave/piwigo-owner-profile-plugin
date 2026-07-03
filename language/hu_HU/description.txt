@@ -1,0 +1,1 @@
+Kezeli a tulajdonos nyilvanos profiladatait, a szerkesztoi feluletet es a profil nyilvanos megjeleniteset.

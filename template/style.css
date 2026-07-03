@@ -1,3 +1,28 @@
+.opp-owner-profile:lang(en),
+.opp-owner-profile:lang(es),
+.opp-owner-profile:lang(hu),
+.opp-owner-profile:lang(sk),
+.opp-owner-profile-public:lang(en),
+.opp-owner-profile-public:lang(es),
+.opp-owner-profile-public:lang(hu),
+.opp-owner-profile-public:lang(sk) {
+  font-family: "Noto Sans", "Segoe UI", "DejaVu Sans", sans-serif;
+}
+
+.opp-owner-profile:lang(ru),
+.opp-owner-profile:lang(uk),
+.opp-owner-profile-public:lang(ru),
+.opp-owner-profile-public:lang(uk) {
+  font-family: "Noto Sans", "DejaVu Sans", "Segoe UI", sans-serif;
+}
+
+.opp-owner-profile:lang(zh),
+.opp-owner-profile-public:lang(zh) {
+  font-family:
+    "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB",
+    "Source Han Sans SC", sans-serif;
+}
+
 .opp-owner-profile-public {
   max-width: 960px;
   color: inherit;
