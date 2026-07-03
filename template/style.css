@@ -168,22 +168,21 @@
     margin-top: 1.75rem;
   }
 
-  .opp-owner-profile-table,
-  .opp-owner-profile-table tbody,
-  .opp-owner-profile-table tr,
-  .opp-owner-profile-table th,
-  .opp-owner-profile-table td {
-    display: block;
-    width: 100%;
-  }
-
   .opp-owner-profile-table tr {
-    margin-bottom: 0.9rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    align-items: start;
   }
 
   .opp-owner-profile-table th {
-    margin-bottom: 0.12rem;
+    width: auto;
     padding-right: 0;
+  }
+
+  .opp-owner-profile-table td {
+    width: auto;
+    text-align: right;
   }
 
   .opp-owner-profile-contact-number {
@@ -197,10 +196,11 @@
   }
 
   .opp-owner-profile-availability-row {
-    display: block;
+    gap: 0.75rem;
   }
 
   .opp-owner-profile-availability-time {
-    margin-top: 0.45rem;
+    margin-left: auto;
+    text-align: right;
   }
 }
