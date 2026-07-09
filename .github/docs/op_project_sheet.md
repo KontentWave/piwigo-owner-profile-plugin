@@ -311,6 +311,7 @@ Security:
 Current implementation note:
 
 - `contact_number` is validated as a Slovak phone candidate for the current standalone plugin behavior
+- the `contact_number` editor shows a generic Slovak placeholder example (`+421 917 123 456`) instead of a user-specific hint number
 - the UI provides immediate client-side validation in addition to backend validation
 - the save action uses Darkroom's `btn btn-main` button treatment so the Owner Profile block matches the surrounding profile page styling
 - the plugin ships localized UCP/public-profile strings and localized plugin descriptions for `en_UK`, `es_ES`, `hu_HU`, `sk_SK`, `ru_RU`, `uk_UA`, and `zh_CN`
